@@ -23,107 +23,63 @@ function computerPlay() {
     return computerSelection
 }
 
-// Prompt user to input their selection. Include validation for either rock, paper, or scissors. Convert input to lower case for sake of comparison.
-function userPlay() {
-   userSelection = prompt('Rock, paper, or scissors?', '');
-   userSelection = userSelection.toLowerCase();
-   if (userSelection !== 'rock' && userSelection !== 'paper' && userSelection !== 'scissors') {
-       alert('Please enter a valid response.')
-       userPlay();
-   }
-   return userSelection;
-}
-
 // Create round function that compares user selection to computer selection and determines a winner. This function calls the computer selection function and prompts the user. Function will compare selections and add 1 to the score of the winner. Do not add in the event of a tie. 
-function playRound(computerChoice = computerPlay(), userChoice = userPlay()) {
+function playRound(computerChoice = computerPlay(), userChoice) {
     let winner;
-    if (computerChoice === 'rock') {
-        switch (userChoice) {
-            case 'rock':
-            alert('It\'s a tie!');
-            break;
+    const div = document.querySelector('#results');
+    div.innerHTML = '';
 
-            case 'paper':
-            alert('You win! Paper beats Rock.');
-            winner = 'user'
-            ++userScore;
-            break;
-
-            case 'scissors':
-            alert('You lose! Rock beats Scissors.');
-            winner = 'computer';
-            ++computerScore;
-            break;
-        }
-    } else if (computerChoice === 'paper') {
-        switch (userChoice) {
-            case 'rock':
-            alert('You lose! Paper beats rock.');
-            winner = 'computer';
-            ++computerScore;
-            break;
-
-            case 'paper':
-            alert('It\'s a tie!');
-            break;
-
-            case 'scissors':
-            alert('You win! Scissors beats paper.');
-            winner = 'user';
-            ++userScore;
-            break;
-        }
+    if (computerChoice === userChoice) {
+        const para1 = document.createElement('p');
+        para1.textContent = `It is a tie! You have both chosen ${userChoice}.`
+        div.appendChild(para1);
+    } else if ((computerChoice === 'rock' && userChoice === 'paper') || (computerChoice === 'paper' && userChoice === 'scissors') || (computerChoice === 'scissors' && userChoice === 'rock')) {
+        winner = 'win';
+        ++userScore;
     } else {
-        switch (userChoice) {
-            case 'rock':
-            alert('You win! Rock beats scissors.');
-            winner = 'user';
-            ++userScore;
-            break;
-
-            case 'paper':
-            alert('You lose! Scissors beats paper.');
-            winner = 'computer';
-            ++computerScore;
-            break;
-
-            case 'scissors':
-            alert('It\'s a tie.');
-            break;
-        }
-    }
-    
-    if (winner === 'user') {
-        alert(`You won that round! The score is You: ${userScore} Computer: ${computerScore}.`);
-    } else if (winner === 'computer') {
-        alert (`You lost that round! The score is You: ${userScore} Computer: ${computerScore}.`);
-    } else {
-        alert (`That round ended in a tie! The score is You: ${userScore} Computer: ${computerScore}.`);
+        winner = 'lose';
+        ++computerScore;
     }
 
-    return `The score after this round is You: ${userScore} Computer: ${computerScore}`
-}
+    const para1 = document.createElement('p');
+    const para2 = document.createElement('p');
 
-// Create function that plays games until either user or computer wins 5. Use while loop (both scores are less than 5). Run round function. Return “You win” or “You lose”.
-function game() {
-    while (userScore < 5 && computerScore < 5) {
-        playRound();
+    if (winner === 'win') {
+        para1.textContent = `You ${winner}! ${userChoice.charAt(0).toUpperCase() + userChoice.slice(1)} beats ${computerChoice}!`
+    } else if (winner === 'lose') {
+        para1.textContent = `You ${winner}! ${computerChoice.charAt(0).toUpperCase() + computerChoice.slice(1)} beats ${userChoice}!`
     }
-    alert(`FINAL SCORE You: ${userScore} Computer: ${computerScore}`);
-    playAgain();
-    return;
-}
 
-// Reset variables to 0
-function playAgain() {
-    let confirmPlayAgain = confirm('Play again?');
-    if (confirmPlayAgain) {
-        userScore = 0;
-        computerScore = 0;
-        game();
-    } else {
-        return;
+    div.appendChild(para1);
+    para2.textContent = `SCORE  You: ${userScore}   Computer: ${computerScore}`
+    div.appendChild(para2);
+
+    if (userScore === 5 || computerScore === 5) {
+        endGame();
     }
 }
 
-game();
+function endGame() {
+    const div = document.querySelector('#results');
+    div.innerHTML = '';
+    const para = document.createElement('p');
+
+    if (userScore > computerScore) {
+        para.textContent = `You win! The final score was ${userScore} - ${computerScore}. Choose your next weapon to play again.`
+    } else {
+        para.textContent = `You lose... The final score was ${userScore} - ${computerScore}. Better luck next time! Choose your next weapon to play again.`
+    }
+
+    div.appendChild(para);
+    userScore = 0;
+    computerScore = 0;
+}
+
+function clickToPlay(e) {
+    playRound(computerPlay(), e.target.id);
+    userSelection = e.target.id;
+    return userSelection;
+}
+
+const buttons = document.querySelectorAll('button');
+buttons.forEach(button => button.addEventListener('click', clickToPlay));
